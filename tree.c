@@ -5,9 +5,10 @@
 #include "dialog.h"
 #include <stdio.h>
 
-int AddItem(Item** tree, Info* inf, int key) {
+void* AddItem(Item** tree, Info* inf, int key) {
 	Item* start = *tree;
 	Item* p = NULL;
+	Item* help = (Item*)calloc(1,sizeof(Item));
 	Item* par;
 	while (start->inf != NULL) {
 		if (key > start->key) {
@@ -29,13 +30,13 @@ int AddItem(Item** tree, Info* inf, int key) {
 		if (start->inf == NULL) { break; }
 		if (key == start->key) {
 			if (start->inf->inf1 != NULL) {
-				show_inf(start);
+			     Cp_Item(start,help);
 			}
-			if (start->inf->inf1 != NULL && start->inf->inf2 != NULL) {
-				free(start->inf->inf1);
-				free(start->inf->inf2);
-			}
-			free(start->inf);
+			//if (start->inf->inf1 != NULL && start->inf->inf2 != NULL) {
+			//	free(start->inf->inf1);
+			//	free(start->inf->inf2);
+			//}
+			//free(start->inf);
 			start->inf = (Info*)calloc(1, sizeof(Info));
 			getinf(inf,start->inf);
 			break;
@@ -48,6 +49,7 @@ int AddItem(Item** tree, Info* inf, int key) {
 		start->key = key;
 	}
 	Balance(*tree, tree,key);
+	return help;
 }
 void print_tree(Item* tree, int i) {
 	if (tree == NULL) { return; }
@@ -143,7 +145,7 @@ void* find_par(Item* start,Item* tree) {
 			tree = tree->left;
 		}
 	}
-}
+}//KISS
 void rotate_l(Item* start,Item* par, Item** root) {
 	if (start->right != NULL) {
 		if (start->right->balance == -1) {
@@ -247,12 +249,11 @@ void find_dif(int key, Item* tree) {
 		return;
 	}
 }
-void Delete(int key, Item* tree, Item** root) {
+int Delete(int key, Item* tree, Item** root) {
 	Item* start = find(key,tree);
 	Item* help;
 	if (start == NULL) { 
-		No_Elements();
-		return;
+		return-1;
 	}
 	Item* par = find_par(start,tree);
 	if (start->left != NULL && start->right != NULL) {
@@ -384,7 +385,13 @@ int load(Item* tree, char* name) {
 		to_int(inf_help[0], &key);
 		help->inf1 = inf_help[1];
 		help->inf2 = inf_help[2];
-		AddItem(&tree, help, key);
+		Item* help1=AddItem(&tree, help, key);
+		if (help1->inf != NULL) {
+			show_inf(help1);
+			free_info(help1);
+		}
+		free(help1->inf);
+		free(help1);
 			free(inf_help[0]);
 	}
 	for (int i = 0; i < 3; i++) {
@@ -395,4 +402,63 @@ int load(Item* tree, char* name) {
 	free(help);
 	fclose(f);
 	return 0;
+}
+
+
+int dop_1(Item* tree, FILE* output) {
+	if (tree == NULL)
+		return 0;
+	if (tree->left != NULL && tree->right != NULL)
+		fprintf(output, "%d->%d,%d\n", tree->key,  tree->right->key,  tree->left->key );
+	else if (tree->left == NULL || tree->right == NULL) {
+	    if (tree->right == NULL && tree->left != NULL)
+			fprintf(output, "%d->%d\n", tree->key, tree->left->key);
+		else if (tree->left == NULL && tree->right != NULL)
+			fprintf(output, "%d->%d\n", tree->key, tree->right->key);
+	}
+	dop_1(tree->right, output);
+	dop_1(tree->left, output);
+	return 0;
+}
+
+
+void dop_2() {
+	Item* tree = (Item*)calloc(1, sizeof(Item));
+	Info* inf = (Info*)calloc(1, sizeof(Info));
+	Item* next;
+	FILE* f;
+	f = fopen("asdf","w+b");
+	int n = 10, key, k, i, m,key1;
+		do{
+			printf("\nAdd item?\n1. Yes\n2. No\n");
+			Get_int(&m);
+			if (m == 1) {
+				printf("Enter key -->\n");
+				Get_key(&key);
+				inf->help = ftell(f);
+				fwrite(&key, sizeof(int), 1, f);
+				next = find(key, tree);
+				if (next == NULL) {
+					Item* help1 = AddItem(&tree, inf, key);
+					if (help1->inf != NULL) {
+						show_inf(help1);
+						free_info(help1);
+					}
+					free(help1->inf);
+					free(help1);
+				}
+			}
+		} while (m<2);
+		do {
+			printf("Enter key -->\n");
+			Get_key(&key1);
+			next = find(key1, tree);
+			if (next == NULL) {
+				printf("\nNo  elements\n");
+			}
+		} while (next == NULL);
+	printf("\noffset --> %d,number --> %d\n", next->inf->help, next->key);
+	free_tree(tree);
+	free(inf);
+	return 1;
 }

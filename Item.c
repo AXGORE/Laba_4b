@@ -6,6 +6,7 @@
 
 void getinf(Info* from, Info* here) {
 	//here->inf_f = from->inf_f;
+	here->help = from->help;
 	if (from->inf1 != NULL && from->inf2 != NULL) {
 		here->inf1 = (char*)calloc(strlen(from->inf1) + 1, sizeof(char));
 		strcpy(here->inf1, from->inf1);
@@ -14,6 +15,7 @@ void getinf(Info* from, Info* here) {
 		free(from->inf2);
 		free(from->inf1);
 	}
+	
 	//free(from);
 }
 

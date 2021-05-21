@@ -2,6 +2,7 @@
 #include "tree.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "dialog.h"
 #define __CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -11,11 +12,14 @@
 int main() {
 	Info* inf = (Info*)calloc(1, sizeof(Info));
 	Item* tree = (Item*)calloc(1, sizeof(Item));
+	Item* help1;
+	FILE* f;
 	int release, key;
 	char* name;
+	//char* fname ;
 	int a, f1 = 0, f2 = 0, n;
 	int vsp;
-	//_crtBreakAlloc = 100;
+	//_crtBreakAlloc = 1356;
 	do {
 		printf("Use file?\n1. Yes\n2. No\n");
 		Get_int(&n);
@@ -43,10 +47,17 @@ int main() {
 		Item* help;
 		a = dialog(&key, &inf, &release);
 		if (a == 1) {
-			n=AddItem(&tree, inf, key);
+			help1=AddItem(&tree, inf, key);
+			if (help1->inf != NULL) {
+				show_inf(help1);
+				free_info(help1);
+			}
+			free(help1->inf);
+			free(help1);
 		}
 		if (a == 2) {
-		    Delete(key, tree, &tree);
+		   n = Delete(key, tree, &tree);
+		   if (n == -1) { No_Elements(); }
 			Balance(tree,&tree,key);
 		}
 		if (a == 3) {
@@ -64,7 +75,25 @@ int main() {
 			show_tree(tree);
 			print_tree(start, 0);
 		}
+		if (a == 8) {
+			//fname = Get_str();
+			f = fopen("output.txt", "w+b");
+			fprintf(f,"digraph G{\n");
+			dop_1(tree, f);
+			fprintf(f, "\n}\n");
+			fclose(f);
+			//free(fname);
+		}
+		if (a == 9) {
+			dop_2();
+		}
 	} while (a != 7);
+	while (getchar() != '\n');
+	/*fname = Get_str();
+	f=fopen(fname,"w+b");
+	dop_1(tree,f);
+	fclose(f);
+	free(fname);*/
 	free_tree(tree);
 	free(inf);
 	_CrtDumpMemoryLeaks();

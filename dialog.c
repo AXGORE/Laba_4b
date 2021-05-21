@@ -83,16 +83,16 @@ void show_tree(Item* tree) {
 }
 
 int dialog(int* key, Info** info, int* num) {
-	char* options[] = { "1. Add Item","2.Delete Items with specefied key and number","3.Find Items with specefied keys", "4.Show the most different element(s)","5.Timing","6.Show tree","7.Exit" };
+	char* options[] = { "1. Add Item","2.Delete Items with specefied key and number","3.Find Items with specefied keys", "4.Show the most different element(s)","5.Timing","6.Show tree","7.Exit","8.Graphiz","9.Find bin"};
 	int flag, vsp, n;
 	printf("Choose one option:\n");
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < 9; i++) {
 		printf("%s\n", options[i]);
 	}
 	do {
 		Get_int(&vsp);
-		if (vsp > 7) { printf("%s\n", "Error, try again "); }
-	} while (vsp > 7);
+		if (vsp > 9) { printf("%s\n", "Error, try again "); }
+	} while (vsp > 9);
 	if (vsp == -1) { return 7; }
 	printf("\n");
 	if (vsp == 1) {
@@ -140,6 +140,12 @@ int dialog(int* key, Info** info, int* num) {
 	if (vsp == 7) {
 		return 7;
 	}
+	if (vsp == 8) {
+		return 8;
+	}
+	if (vsp == 9) {
+		return 9;
+	}
 }
 void show_inf(Item* tree) {
 	if (tree->inf == NULL) {
@@ -167,7 +173,13 @@ int D_Timing() {
 			key[i] = rand() * rand();
 		for (i = 0; i < cnt; ) {
 			k = rand() * rand();
-			AddItem(&tree, inf, k);
+			Item* help1 = AddItem(&tree, inf, k);
+			if (help1->inf != NULL) {
+				show_inf(help1);
+				free_info(help1);
+			}
+			free(help1->inf);
+			free(help1);
 			++i;
 		}
 		m = 0;
